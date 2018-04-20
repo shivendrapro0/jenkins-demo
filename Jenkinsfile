@@ -12,20 +12,23 @@ pipeline {
 		        sh 'ng build'
 		    }   
 		}
-		stage('Stop Docker Instance') { 
+                stage('Build Container') {
+	            when {
+       		         branch 'integration'
+                    }
+                    steps {
+                        sh 'docker build . --tag nodeapp-int'
+                    }
+                }
+		stage('Run Container') { 
+                    when {
+                         branch 'master'
+                    }
 		    steps {
-		        sh 'docker stop app1 || true'
-		        sh 'docker rm app1 || true'
-		    }   
-		}
-		stage('Re-build Image') { 
-		    steps {
-		        sh 'docker build . --tag nodeapp:v1'
-		    }   
-		}
-		stage('Run Docker Instance') { 
-		    steps {
-		        sh 'docker run -d -p 8080:8080 --name app1 nodeapp:v1'
+			sh 'docker build . --tag nodeapp-master'
+                        sh 'docker stop app1 || true'
+                        sh 'docker rm app1 || true'
+		        sh 'docker run -d -p 8080:8080 --name app1 nodeapp-master' 
 		    }   
 		}
 	}
