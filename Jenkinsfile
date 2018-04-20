@@ -31,6 +31,15 @@ pipeline {
 		        sh 'docker run -d -p 8080:8080 --name app1 nodeapp-master' 
 		    }   
 		}
+                stage('Run PR Action') {
+		when { changeRequest target: 'master' }
+                    steps {
+                        sh 'docker build . --tag nodeapp-pull'
+                        sh 'docker stop app2 || true'
+                        sh 'docker rm app2 || true'
+                        sh 'docker run -d -p 8081:8081 --name app2 nodeapp-pull'
+                    }
+                }
 	}
 
 }
